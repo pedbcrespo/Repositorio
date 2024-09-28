@@ -25,6 +25,7 @@ public class UserService {
     private PoolBetRepository poolBetRepository;
 
     public void register(UserRequest userRequest) {
+        //implementar aqui a validacao de usuario
         userRepository.save(userRequest.getUser());
     }
 
