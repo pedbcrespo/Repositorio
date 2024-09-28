@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import bgbackend.com.model.Bet;
 import bgbackend.com.model.PoolBet;
-import bgbackend.com.model.User;
+import bgbackend.com.model.request.BetRequest;
 import bgbackend.com.model.request.UserRequest;
 import bgbackend.com.repository.BetRepository;
 import bgbackend.com.repository.PoolBetRepository;
@@ -28,10 +28,19 @@ public class UserService {
         userRepository.save(userRequest.getUser());
     }
 
-    public void makeBet(User currentUser, Double value, PoolBet pool) {
-        Optional<Bet> optional = pool.getBets().stream().filter(bet -> bet.getUserId().equals(currentUser.getId())).findAny();
+    public void registerBet(BetRequest betRequest) throws Exception {
+        Optional<PoolBet> optional = poolBetRepository.findById(betRequest.getPoolId());
         if(optional.isEmpty()) {
-            Bet newBet = betRepository.save(new Bet(currentUser.getId(), value));
+            throw new Exception("Pool bet not found");
+        }
+        PoolBet pool = optional.get();
+        makeBet(betRequest.getUserId(), betRequest.getValue(), pool);
+    }
+
+    private void makeBet(Long userId, Double value, PoolBet pool) {
+        Optional<Bet> optional = pool.getBets().stream().filter(bet -> bet.getUserId().equals(userId)).findAny();
+        if(optional.isEmpty()) {
+            Bet newBet = betRepository.save(new Bet(userId, value));
             pool.getBets().add(newBet);
         }
         else {
